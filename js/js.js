@@ -1,4 +1,5 @@
 //Esto es una simulacion de una red social para la facultad de medicina. Donde se pueden generar posts a traves de un sistema de muro tipo facebook.
+//Use dos prompts para simular un login para hacerlo un poco mas rapido.
 //Usar en el login 
 //usuario: profejs@gmail.com 
 //contraseña: 123456
