@@ -1,37 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrega 2</title>
     <script defer src="./js/js.js"></script>
     <link rel="stylesheet" href="./css/index.css">
+    <script src="https://kit.fontawesome.com/356f7d6a03.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
+    <button id="limpiarPosts">Limpiar Posts del Storage</button>
     <div class="barraNav" id="barraNav">
         <h4 class="bienvenido" id="bienvenido">Bienvenido </h4>
         <button id="login" class="login">Login</button>
     </div>
+    <div id="loginForm" class="loginForm">
+
+    </div>
+    <div class="buscadorDiv" id="buscadorDiv">
+        <form id="Buscador">
+            <input type="text" name="" id="buscadorInput" placeholder="Que deseas buscar?">
+            <button type="button" id="buscar">Buscar</button>
+        </form>
+    </div>
+    <div class="resultados" id="resultados">
+
+    </div>
     <div class="post" id="posteador">
         <form id="form">
-            <span class="frase">En que estas pensando?</span><br>
-            <input type="text" id="post" class="campoPost">
+            <input type="text" id="post" class="campoPost" placeholder="En que estas pensando?">
             <button type="button" id="publicar">Publicar</button>
         </form>
     </div>
     <div>
-        <h2>Usuarios:</h2>
+
         <div id="usuarios" class="contenedorUsuarios">
-            
+
         </div>
         <hr>
         <div id="posts" class="posts">
-            <h2>Posts:</h2>
+
         </div>
         <hr>
         <div id="historias">
-            <h2>Historias:</h2>
+
         </div>
     </div>
 </body>
+
 </html>

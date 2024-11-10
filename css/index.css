@@ -1,3 +1,22 @@
+.barraNav{
+    width: 100%;
+    background-color: #3680c9;
+    margin-bottom: 10px;
+    border: 2px solid #145799;
+}
+
+.loginForm{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.bienvenido{
+    margin-left: 20px;
+    color: white;
+}
+
 .contenedorUsuarios {
     display: flex;
     align-items: center;
@@ -28,6 +47,32 @@
     justify-content: center;
 }
 
+.buscadorDiv{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resultados{
+    margin-top: 5px;
+    margin-left: 33%;
+    margin-bottom: 10px;
+}
+
+.barraLikes{
+    margin-bottom: 10px;
+}
+
+.fa-regular{
+    margin-right: 5px;
+}
+
+.divBusqueda{
+    display: flex;
+    border: 1px solid rgb(96 139 168);
+    margin-right: 50%;
+    margin-top: 1px;
+}
 
 .slideDeUsers{
     width: 50px;
@@ -41,11 +86,8 @@
 
 .infoUserPost{
     display: flex;
-    margin-left: 200px;
-}
-
-.div2{
-    margin-top: 50px;
+    border: 0.5px solid grey;
+    margin-bottom: 10px;
 }
 
 .campoPost{
