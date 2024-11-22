@@ -1,0 +1,3 @@
+
+Hacer display de los posts en el feed del user con imagen o no.
+Ver si imgur sirve para archivos.

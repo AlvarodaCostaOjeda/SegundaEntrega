@@ -48,7 +48,7 @@ class Post {
             this.nombreUsuario = nombreUsuario,
             this.fotoUsuario = fotoUsuario,
             this.fotoPost = fotoPost,
-            this.comments = [{}],
+            this.comments = [],
             this.likes = 0
     }
 }
@@ -111,9 +111,13 @@ let usuarios = [
 //array de posts
 let posts = []
 let users = []
-const post1 = new Post(1, 2, "Que caloor que hacee!", "Patricia Bilek", linkFotoUser, linkFotoPost, [{}], 0)
-const post2 = new Post(2, 1, "Hola soy Pedro Martinez soy estudiante de medicina y es mi primera vez en Umeds.", "Pedro Martinez", linkFotoUser, linkFotoPost, [{}], 0)
-const post3 = new Post(3, 3, "Hoy comenzamos el curso de anatomia en Udelar!!", "Rodrigo Ojeda", linkFotoUser, linkFotoPost, [{}], 0)
+const post1 = new Post(1, 2, "Que caloor que hacee!", "Patricia Bilek", linkFotoUser, linkFotoPost, [], 0)
+const post2 = new Post(2, 1, "Hola soy Pedro Martinez soy estudiante de medicina y es mi primera vez en Umeds.", "Pedro Martinez", linkFotoUser, linkFotoPost, [], 0)
+const post3 = new Post(3, 3, "Hoy comenzamos el curso de anatomia en Udelar!!", "Rodrigo Ojeda", linkFotoUser, linkFotoPost, [], 0)
+
+//Tengo que hacer un fetch a users.json y utilizar esa informacion para hacer el login. Ahi ya van a quedar en el localstorage los users o deberia ponerlos.
+//Tengo que hacer un fetch de los posts y printearlos
+//Con promesas o try catch
 
 //Si el localStorage posts esta vacio le cargo los tres posts. Luego al publicar un nuevo posts se lo añado al localStorage asi se mantienen siempre.
 if (!localStorage.getItem("posts")) {
@@ -130,120 +134,56 @@ const login = function () {
         usuarios.forEach(user => {
             if (email === user.email) {
                 if (pass === user.password) {
-                    document.getElementById("posteador").style.display = 'flex'
-                    document.getElementById("loginForm").style.display = 'none'
                     document.getElementById("entrar").style.display = 'none'
                     const usuario = new User(user.id, user.nombre, user.carrera, user.titulo, user.email, user.seUnio, user.rol, user.foto, user.password)
                     localStorage.setItem("userUmeds", JSON.stringify(usuario))
                     let bienvenida = document.getElementById("bienvenido")
                     bienvenida.innerHTML = "Bienvenido " + user.nombre
-                    //Llamo a la funcion crear boton para salir
-                    crearUnBoton("barraNav", "Salir", "salir", "salir", salir)
                     location.reload()
                 }
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Los datos ingresados no son correctos!",
+                    footer: '<a href="#">No tienes un usuario?</a>'
+                });
             }
         });
     } else {
-        //console.log("debes completar los campos!")
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Falta completar alguno de los campos!!",
+            footer: '<a href="#">No tienes un usuario?</a>'
+        });
     }
 }
 
-const printearUsuarios = (nombreUsuario, foto) => {
-    //Tomo la referencia del contenedor para usuarios en el html
-    let usersContainer = document.getElementById("usuarios")
-    //se crean los elementos
-    let nombre = document.createElement("h6")
-    let userImagen = document.createElement("img")
-    //se cambian sus propiedades
-    userImagen.className = "slideDeUsers"
-    userImagen.src = foto
-    nombre.innerHTML = nombreUsuario
-    //se agregan al html
-    usersContainer.append(userImagen)
-    usersContainer.append(nombre)
-}
 
 const printearPosts = (nombreUsuario, content, fotoUsuario, postUserId, postId, postComments) => {
     //Tomo la referencia del contenedor para posts en el html
-
-    let postContainer = document.getElementById("posts")
-    postContainer.style.margin = "auto"
-    postContainer.style.width = "50%"
-
-    //se crean los elementos
-    let propietarioDelPost = document.createElement("p")
-    let contenido = document.createElement("p")
-    let fotoDelUser = document.createElement("img")
-    let div = document.createElement("div")
-    let div2 = document.createElement("div")
-
-    //se cambian sus propiedades
-    div.className = "infoUserPost"
-    div.id = "div1"
-    div2.className = "div2"
-    div2.id = "div2" + postId
-    div2.style.marginTop = "50px"
-    fotoDelUser.src = fotoUsuario
-    fotoDelUser.className = "fotoDelUser"
-    propietarioDelPost.innerHTML = nombreUsuario
-    contenido.innerHTML = content
-
-    //se agregan al html
-    div2.append(contenido)
-    div.append(fotoDelUser)
-    div.append(propietarioDelPost)
-    div.append(div2)
-    postContainer.append(div)
-    div2.append(crearBarraPosts(postId, postComments))
-
     let user = JSON.parse(localStorage.getItem("userUmeds"))
     let posts = JSON.parse(localStorage.getItem("posts"))
+    let postContainer = document.getElementById("posts")
+    let container = document.createElement("div")
+    container.innerHTML = `
+                               <div class="row">
+                                <div class="col-md-1"><img src="${fotoUsuario}" class="fotoDelUser"></img></div>
+                                <div class="col-md"><p>${nombreUsuario}${(user && user.id == postUserId) ? `<li class="editarPost" style="list-style-type: none" value="${postId}"><i class="fa-regular fa-pen-to-square"  ></i></li>` : ""}</p></div>               
+                                </div>
+                                <div>
+                                    <div class="row">
+                                        <div class="col-md post-contenido"><p class="lead">${content}<p/></div>
+                                    </div>
+                                    <div>   
+                                        <li class="fa-regular fa-thumbs-up" value="${postId}">${contarLikes(postId)}</li>
+                                        <li class="fa-regular fa-comment" value="${postId}"></li>
+                                    </div>
+                                </div>
+    `
+    postContainer.appendChild(container)
 
-    if (user && user.id == postUserId) {
-        let div3 = document.createElement("div")
-        div3.id = "editButton" + postId
-        div.append(div3)
-
-        crearUnBoton(div3.id, "Editar", "editar", "editar", abrirInputParaEditar = () => {
-            let cerrar = document.createElement("li")
-            cerrar.className = "fa-regular fa-circle-xmark"
-            let div4 = document.createElement("div")
-            div4.id = "div4"
-            let input = document.createElement("input")
-            input.placeholder = "Ingresa otro post"
-            div4.append(input)
-            div2.append(div4)
-            div4.append(cerrar)
-            div3.style.display = "none"
-
-            cerrar.addEventListener('click', function (e) {
-                div4.remove();
-                div3.style.display = "block"
-            })
-
-            crearUnBoton(div4.id, "Aceptar", "aceptar", "aceptar", editarPost = () => {
-                //posts[postId - 1].likes = posts[postId - 1].likes + 1
-                posts[postId - 1].content = input.value
-                console.log(posts)
-                localStorage.setItem("posts", JSON.stringify(posts))
-                location.reload()
-            })
-        })
-    }
-
-}
-
-const publicarPost = (contenido) => {
-    //agarro la informacion del usuario para relacionarla con el post
-    let user = JSON.parse(localStorage.getItem("userUmeds"))
-    //Cada post tiene un id, como no tengo una base de datos que genere el id voy a sumarle 1 al lenght del array.
-    const nuevoPost = new Post(posts.length + 1, user.id, contenido, user.nombre, user.foto)
-
-    posts.push(nuevoPost);
-    localStorage.setItem("posts", JSON.stringify(posts))
-    //Limpio el input donde escribimos el post
-    document.getElementById("post").value = ""
-    printearPosts(user.nombre, contenido, user.foto, user.id, posts.length)
 }
 
 //Funcion crear boton, le paso por parametro contenedor la div donde va a agregarse. botonInnerText es su texto. BotonClassName es la clase, botonID es la id del boton
@@ -269,52 +209,15 @@ const salir = function () {
 const crearForm = () => {
     document.getElementById("login").style.display = "none"
     let div = document.getElementById("loginForm")
-    let emailInput = document.createElement("input")
-    emailInput.id = "email"
-    emailInput.placeholder = "Email"
-
-    let passInput = document.createElement("input")
-    passInput.id = "pass"
-    passInput.placeholder = "Contraseña"
-    passInput.type = "password"
-
-    div.append(emailInput)
-    div.append(passInput)
-
-    crearUnBoton("loginForm", "Entrar", "entrar", "entrar", login)
-}
-
-const crearBarraPosts = (postId, comments) => {
-    let div = document.createElement("div")
-    let liLikes = document.createElement("li")
-    let liComments = document.createElement("li")
-    liLikes.id = "liLikes" + postId
-    liComments.id = "liComments" + postId
-
-    liLikes.append(contarLikes(postId))
-
-    liComments.addEventListener('click', function (e) {
-        document.getElementById("liComments" + postId).style.display = "none"
-        mostrarComments(postId, comments)
-    })
-
-
-    liLikes.addEventListener('click', function (e) {
-            darLike(postId)
-    })
-
-    if (!localStorage.getItem('userUmeds')) {
-        liLikes.style.pointerEvents = "none";
-        liComments.style.pointerEvents = "none";
+    div.innerHTML = `
+                    <input placeholder="email" type="email" id="email"></input>
+                    <input placeholder="password" type="password" id="pass"></input>
+                    <button class="btn btn-primary" id="entrar">Entrar</button>
+    `
+    let entrar = document.getElementById("entrar")
+    entrar.onclick = () => {
+        login()
     }
-
-    liLikes.className = "fa-regular fa-thumbs-up"
-    liComments.className = "fa-regular fa-comment"
-    div.className = "barraLikes"
-
-    div.append(liLikes)
-    div.append(liComments)
-    return div
 }
 
 const mostrarBusqueda = (resultado) => {
@@ -332,57 +235,27 @@ const mostrarBusqueda = (resultado) => {
     div.append(divBusqueda)
 }
 
-const mostrarComments = (postId, comments) => {
-    let contenedor = document.getElementById("div2" + postId)
+const mostrarComments = (postId, contenedor, comments) => {
+    let reference = document.querySelectorAll(".row.comments")
     let div = document.createElement("div")
-    let input = document.createElement("input")
-    let button = document.createElement("button")
-    let cerrar = document.createElement("li")
-    let contenedorComment = document.createElement("div")
-
-    button.innerText = "Comentar"
-    input.placeholder = "Comentario"
-    cerrar.className = "fa-regular fa-circle-xmark"
-
-    contenedor.append(cerrar)
-
-    cerrar.addEventListener('click', function (e) {
-        contenedorComment.remove();
-        input.remove();
-        button.remove();
-        cerrar.style.display = "none"
-        document.getElementById("liComments" + postId).style.display = "contents"
-    })
-
-    button.onclick = () => {
-        crearComment(postId, retornarUser(), input.value)
-    }
-
-    div.append(input)
-    div.append(button)
-    contenedor.append(div)
-
-    if (comments) {
+    if (comments && reference.length == 0) {
         comments.forEach(comment => {
-            if (comment.comment != undefined && comment.nombre != undefined) {
-                let nombre = document.createElement("p")
-                let p = document.createElement("p")
-                nombre.innerText = comment.nombre
-                p.innerText = comment.comment
-                contenedorComment.append(nombre)
-                contenedorComment.append(p)
-                contenedor.append(contenedorComment)
-            }
+            div.innerHTML = `
+                            <div class="row comments" id="comments">
+                                <div class="col-md-1">
+                                    <img src="${comment.img}" style="width: 30px; margin-left: 40px; border-radius: 50%;"></img>
+                                </div>
+                                <div class="col-md">
+                                    <p>${comment.nombre}: ${comment.comment}</p>
+                                </div>                            
+                            </div>
+                            `
+            contenedor.append(div)
         })
+    } else {
+        document.getElementById("comments").remove()
+
     }
-}
-
-const crearComment = (postId, nombreUser, comment) => {
-    let posts = JSON.parse(localStorage.getItem("posts"))
-
-    posts[postId - 1].comments.push({ nombre: nombreUser, comment: comment })
-    localStorage.setItem("posts", JSON.stringify(posts))
-    location.reload()
 }
 
 const retornarUser = () => {
@@ -401,7 +274,7 @@ const darLike = (postId) => {
         //console.log(posts)
         localStorage.setItem("posts", JSON.stringify(posts))
         localStorage.setItem("userUmeds", JSON.stringify(user))
-       // console.log(user)
+        // console.log(user)
         updateLikes(postId, posts[postId - 1].likes = posts[postId - 1].likes)
     } else {
         //console.log("ya le diste like")
@@ -414,7 +287,86 @@ const contarLikes = (postId) => {
 }
 
 const updateLikes = (postId, likes) => {
-    document.getElementById("liLikes" + postId).innerText = likes
+    let referencia = document.querySelectorAll(".fa-regular.fa-thumbs-up")
+    for (let i = 0; i < likeBotones.length; i++) {
+        if (referencia[i].value == postId) {
+            referencia[i].innerHTML = likes
+        }
+    }
+}
+
+async function sweetAlertEditPost(postId) {
+    const { value: text } = await Swal.fire({
+        input: "textarea",
+        inputLabel: "Nuevo post",
+        inputPlaceholder: "Digita tu nuevo post aqui...",
+        inputAttributes: {
+            "aria-label": "Digita tu nuevo post aqui"
+        },
+        showCancelButton: true
+    });
+    if (text) {
+        posts[postId - 1].content = text
+        localStorage.setItem("posts", JSON.stringify(posts))
+        location.reload()
+    }
+}
+
+async function sweetAlertCommentPost(postId) {
+    let user = JSON.parse(localStorage.getItem("userUmeds"))
+    const { value: text } = await Swal.fire({
+        input: "textarea",
+        inputLabel: posts[postId - 1].content,
+        inputPlaceholder: "Tu comentario aqui...",
+        inputAttributes: {
+            "aria-label": "Digita tu nuevo comentario aqui"
+        },
+        showCancelButton: true
+    });
+    if (text) {
+        let posts = JSON.parse(localStorage.getItem("posts"))
+        posts[postId - 1].comments.push({ nombre: user.nombre, comment: text, img: user.foto })
+        localStorage.setItem("posts", JSON.stringify(posts))
+        location.reload()
+    }
+}
+
+async function sweetAlertAbrirPosteador() {
+    const { value: text } = await Swal.fire({
+        input: "textarea",
+        inputLabel: "Nuevo post",
+        inputPlaceholder: "Escribe tu post aqui...",
+        inputAttributes: {
+            "aria-label": "Escribe tu post aqui"
+        },
+        showCancelButton: true
+    });
+    if (text) {
+        //agarro la informacion del usuario para relacionarla con el post
+        let user = JSON.parse(localStorage.getItem("userUmeds"))
+        //Cada post tiene un id, como no tengo una base de datos que genere el id voy a sumarle 1 al lenght del array.
+        const nuevoPost = new Post(posts.length + 1, user.id, text, user.nombre, user.foto)
+        posts.push(nuevoPost);
+        localStorage.setItem("posts", JSON.stringify(posts))
+        //Limpio el input donde escribimos el post
+        printearPosts(user.nombre, text, user.foto, user.id, posts.length)
+        location.reload()
+    }
+}
+
+async function sweetAlertAbrirBuscador(){
+    const { value: name } = await Swal.fire({
+        title: "A quien estas buscando?",
+        input: "text",
+        inputLabel: "Nombre",
+        inputPlaceholder: "Digita el nombre de la persona que buscas"
+      });
+      if (name) {
+        const resultado = usuarios.filter((usuario) => usuario.nombre.includes(name))
+        resultado.forEach(user => {
+            mostrarBusqueda(user)
+        })
+      }
 }
 //-------------------------------------------------------------Chequeo del localstorage, eventos y se recorren los posts -----------------------------------------------//
 
@@ -428,9 +380,11 @@ if (localStorage.getItem('userUmeds')) {
     let user = JSON.parse(localStorage.getItem("userUmeds"))
     bienvenida.innerHTML = user.nombre
     //Llamo a la funcion crear boton para salir
-    crearUnBoton("barraNav", "Salir", "salir", "salir", salir)
+    crearUnBoton("barraNav", "Salir", "btn btn-light", "salir", salir)
 } else {
     document.getElementById("posteador").style.display = 'none'
+    document.getElementById("abrirPosteador").style.pointerEvents = "none"
+    document.getElementById("abrirBuscador").style.pointerEvents = "none"
     //console.log("No estas logueado")
 }
 
@@ -443,39 +397,51 @@ posts.forEach(post => {
     printearPosts(post.nombreUsuario, post.content, post.fotoUsuario, post.userId, post.postId, post.comments)
 });
 
-usuarios.forEach(user => {
-    printearUsuarios(user.nombre, user.foto)
-});
-
-//Boton Publicar
-const publicarBtn = document.getElementById("publicar")
-publicarBtn.onclick = () => {
-    //agarro el contenido del input del html
-    let contenido = document.getElementById("post").value
-    if (contenido.length > 0) {
-        publicarPost(contenido)
-    } else {
-        //console.log("No has escrito nada!")
-    }
-}
-
 const loginBtn = document.getElementById("login")
 loginBtn.onclick = () => {
     crearForm()
-}
-
-//Agregada una funcion de orden superior con el metodo filter() para buscar entre los usuarios un nombre.
-let botonBuscar = document.getElementById("buscar")
-botonBuscar.onclick = () => {
-    let palabra = document.getElementById("buscadorInput").value
-    const resultado = usuarios.filter((usuario) => usuario.nombre.includes(palabra))
-    resultado.forEach(user => {
-        mostrarBusqueda(user)
-    })
 }
 
 let limpiarPosts = document.getElementById("limpiarPosts")
 limpiarPosts.onclick = () => {
     localStorage.removeItem("posts")
     location.reload()
+}
+
+let postEditBotones = document.querySelectorAll(".editarPost")
+for (let i = 0; i < postEditBotones.length; i++) {
+    postEditBotones[i].addEventListener('click', function () {
+        sweetAlertEditPost(postEditBotones[i].value)
+    });
+}
+
+let likeBotones = document.querySelectorAll(".fa-regular.fa-thumbs-up")
+for (let i = 0; i < likeBotones.length; i++) {
+    likeBotones[i].addEventListener('click', function () {
+        darLike(likeBotones[i].value)
+    });
+}
+
+let comentarBotones = document.querySelectorAll(".fa-regular.fa-comment")
+for (let i = 0; i < comentarBotones.length; i++) {
+    comentarBotones[i].addEventListener('click', function () {
+        sweetAlertCommentPost(comentarBotones[i].value)
+    });
+}
+
+let comments = document.querySelectorAll(".col-md.post-contenido")
+for (let i = 0; i < comments.length; i++) {
+    comments[i].addEventListener('click', function () {
+        mostrarComments(i, comments[i], posts[i].comments)
+    });
+}
+
+let abrirPosteador = document.getElementById("abrirPosteador")
+abrirPosteador.onclick = () => {
+    sweetAlertAbrirPosteador()
+}
+
+let abrirBuscador = document.getElementById("abrirBuscador")
+abrirBuscador.onclick = () => {
+    sweetAlertAbrirBuscador()
 }
